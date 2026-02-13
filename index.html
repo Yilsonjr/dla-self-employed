@@ -308,7 +308,10 @@
                     <canvas id="sig_tp" class="signature-canvas w-full h-32 border-2 border-dashed border-slate-300 rounded-lg bg-slate-50"></canvas>
                     <div class="flex justify-between items-center mt-3">
                         <button type="button" onclick="clearSig('sig_tp')" class="text-sm font-bold text-red-500 uppercase">Clear / Limpiar</button>
-                        <span id="sig_date_display" class="text-sm text-slate-500"></span>
+                        <div class="flex items-center gap-2">
+                            <label class="label-title text-xs mb-0">Signature Date / Fecha:</label>
+                            <input type="date" id="sig_date" class="w-40" required>
+                        </div>
                     </div>
                 </div>
             </div>

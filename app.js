@@ -2,7 +2,8 @@
 const BACKEND_URL = window.APP_CONFIG?.backendUrl || 'https://dla-tax.onrender.com';
 const today = new Date().toISOString().split('T')[0];
 document.getElementById('form_date').value = today;
-document.getElementById('sig_date_display').textContent = today;
+// Set default for sig_date but user can change it
+document.getElementById('sig_date').value = today;
 
 // Toggle Dependents Section
 function toggleDeps() {
@@ -155,7 +156,7 @@ document.getElementById('selfEmployedForm').addEventListener('submit', async fun
             expense_freq: document.getElementById('expense_freq').value,
             expense_proof: getSelectedValues('expense_proof'),
             public_assist: document.querySelector('input[name="public_assist"]:checked')?.value || '',
-            sig_date: today,
+            sig_date: document.getElementById('sig_date').value || today,
             signature: document.getElementById('sig_tp').toDataURL('image/png')
         };
 
