@@ -15,7 +15,7 @@
             border: 1px solid #cbd5e1;
             border-radius: 8px;
             font-size: 14px;
-            background: #334f58;
+            color: #000;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
         input:focus, select:focus, textarea:focus {
