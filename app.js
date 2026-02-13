@@ -192,7 +192,11 @@ document.getElementById('selfEmployedForm').addEventListener('submit', async fun
         doc.setFontSize(14);
         doc.setTextColor(30, 64, 124);
         doc.text('SELF EMPLOYED QUESTIONNAIRE', pageWidth / 2, y, { align: 'center' });
-        y += 10;
+        y += 9;
+        doc.setFontSize(10);
+        doc.setTextColor(30, 64, 124);
+        doc.text('Prepared by Sergio De Los Angele', pageWidth / 2, y, { align: 'center' });
+        y += 10
 
         // Personal Info
         doc.setFontSize(11);
