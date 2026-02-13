@@ -1,0 +1,12 @@
+{
+  "name": "dla-tax-root",
+  "version": "1.0.0",
+  "description": "Root package for DLA Tax Services - Redirects to backend",
+  "scripts": {
+    "start": "cd backend && npm install && node src/index.js",
+    "build": "cd backend && npm install"
+  },
+  "engines": {
+    "node": "18"
+  }
+}

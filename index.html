@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SELF EMPLOYED QUESTIONNAIRE - DLA TAX SERVICES</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        .signature-canvas { touch-action: none; }
+        .label-title {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #475569;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+        input[type="text"], input[type="date"], input[type="number"], input[type="email"], select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: white;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-10 bg-slate-50" style="font-family: 'Inter', sans-serif;">
+
+    <div class="max-w-4xl mx-auto">
+        <!-- HEADER -->
+        <div class="bg-blue-900 text-white p-8 rounded-t-2xl text-center shadow-2xl relative overflow-hidden">
+            <div class="relative z-10">
+                <h1 class="text-3xl font-black tracking-tighter">DLA TAX SERVICES</h1>
+                <h2 class="text-xl font-bold mt-2 text-blue-200 uppercase tracking-widest">Self Employed Questionnaire</h2>
+                <p class="mt-4 text-sm opacity-80 font-medium">Cuestionario para Trabajadores por Cuenta Propia</p>
+            </div>
+            <div class="absolute top-0 right-0 w-24 h-24 bg-blue-800 rounded-full -mr-12 -mt-12 opacity-50"></div>
+        </div>
+
+        <form id="selfEmployedForm" class="bg-white shadow-2xl rounded-b-2xl">
+            <!-- 01. ENCABEZADO E INFORMACIÓN PERSONAL -->
+            <div class="p-8 border-b border-slate-200">
+                <h3 class="font-black text-blue-900 mb-6 flex items-center gap-2 text-lg uppercase tracking-tight">
+                    <span class="bg-blue-700 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">01</span>
+                    Personal Information / Información Personal
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="label-title">Date / Fecha</label>
+                        <input type="date" id="form_date" required>
+                    </div>
+                    <div></div>
+                    <div>
+                        <label class="label-title">Name / Nombre</label>
+                        <input type="text" id="tp_name" placeholder="First Name" required>
+                    </div>
+                    <div>
+                        <label class="label-title">Last Name / Apellido</label>
+                        <input type="text" id="tp_lastname" placeholder="Last Name" required>
+                    </div>
+                    <div>
+                        <label class="label-title">SSN (Social Security Number)</label>
+                        <input type="text" id="tp_ssn" placeholder="XXX-XX-XXXX" maxlength="9" inputmode="numeric" pattern="[0-9]*" required>
+                    </div>
+                    <div>
+                        <label class="label-title">Phone / Teléfono</label>
+                        <input type="text" id="tp_phone" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="label-title">Street Address / Dirección</label>
+                        <input type="text" id="addr_main" required>
+                    </div>
+                    <div>
+                        <label class="label-title">City / Ciudad</label>
+                        <input type="text" id="addr_city" required>
+                    </div>
+                    <div>
+                        <label class="label-title">State / Estado</label>
+                        <input type="text" id="addr_state" required>
+                    </div>
+                    <div>
+                        <label class="label-title">Zip Code</label>
+                        <input type="text" id="addr_zip" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 02. INFORMACIÓN FAMILIAR Y DEL NEGOCIO -->
+            <div class="p-8 border-b border-slate-200 bg-blue-50/30">
+                <h3 class="font-black text-blue-900 mb-6 flex items-center gap-2 text-lg uppercase tracking-tight">
+                    <span class="bg-blue-700 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">02</span>
+                    Family & Business / Familia y Negocio
+                </h3>
+
+                <!-- Dependents Section -->
+                <div class="mb-6">
+                    <label class="label-title text-blue-700">Do you have dependents? / ¿Tiene dependientes?</label>
+                    <div class="flex gap-8 mt-2">
+                        <label class="flex items-center gap-2 font-bold">
+                            <input type="radio" name="has_deps" value="Yes" onchange="toggleDeps()"> Yes / Sí
+                        </label>
+                        <label class="flex items-center gap-2 font-bold">
+                            <input type="radio" name="has_deps" value="No" onchange="toggleDeps()" checked> No
+                        </label>
+                    </div>
+
+                    <div id="deps_section" class="mt-6 hidden">
+                        <div id="deps_container" class="space-y-4"></div>
+                        <div class="mt-4">
+                            <button type="button" onclick="addDep()" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold text-xs hover:bg-blue-700 transition-colors shadow-md">
+                                + ADD DEPENDENT / AGREGAR
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Business Details -->
+                <div class="border-t border-blue-200 pt-6">
+                    <label class="label-title text-blue-700 mb-4">Business Details / Detalles del Negocio</label>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2">
+                            <label class="label-title">What type of business did you do? / ¿A qué tipo de negocio se dedica?</label>
+                            <input type="text" id="business_type" placeholder="Describe your business activity" required>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="label-title">In your house? / ¿En su casa?</label>
+                            <div class="flex gap-8 mt-2">
+                                <label class="flex items-center gap-2 font-bold">
+                                    <input type="radio" name="biz_in_house" value="Yes" onchange="toggleBusinessLocation()"> Yes / Sí
+                                </label>
+                                <label class="flex items-center gap-2 font-bold">
+                                    <input type="radio" name="biz_in_house" value="No" onchange="toggleBusinessLocation()" checked> No
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- If NO - Business Location Details -->
+                    <div id="biz_external" class="mt-6 hidden border border-blue-200 rounded-xl p-6 bg-blue-50">
+                        <h4 class="font-bold text-blue-800 mb-4">Business Location Details</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2">
+                                <label class="label-title">Explain where / Explique dónde</label>
+                                <textarea id="biz_location_explain" rows="2" placeholder="Describe the location..."></textarea>
+                            </div>
+                            <div>
+                                <label class="label-title">Name of Business / Nombre del Negocio</label>
+                                <input type="text" id="biz_name">
+                            </div>
+                            <div>
+                                <label class="label-title">Business Address / Dirección</label>
+                                <input type="text" id="biz_addr">
+                            </div>
+                            <div>
+                                <label class="label-title">City / Ciudad</label>
+                                <input type="text" id="biz_city">
+                            </div>
+                            <div>
+                                <label class="label-title">State / Estado</label>
+                                <input type="text" id="biz_state">
+                            </div>
+                            <div>
+                                <label class="label-title">Zip Code</label>
+                                <input type="text" id="biz_zip">
+                            </div>
+                            <div>
+                                <label class="label-title">Telephone / Teléfono</label>
+                                <input type="text" id="biz_phone">
+                            </div>
+                            <div>
+                                <label class="label-title">Contact Person / Persona de Contacto</label>
+                                <input type="text" id="biz_contact">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- If YES - Income Calculation -->
+                    <div id="biz_home" class="mt-6 hidden border border-blue-200 rounded-xl p-6 bg-blue-50">
+                        <h4 class="font-bold text-blue-800 mb-4">Home Business Details</h4>
+                        <label class="label-title">Explain exactly what you do and how you calculate your income / Explique qué hace y cómo calcula sus ingresos</label>
+                        <textarea id="biz_income_calc" rows="4" placeholder="Describe your business activities and income calculation method..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 03. DATOS FINANCIEROS -->
+            <div class="p-8 border-b border-slate-200">
+                <h3 class="font-black text-green-900 mb-6 flex items-center gap-2 text-lg uppercase tracking-tight">
+                    <span class="bg-green-700 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">03</span>
+                    Financial Data / Datos Financieros
+                </h3>
+
+                <!-- Income -->
+                <div class="mb-8">
+                    <h4 class="font-bold text-green-800 mb-4 uppercase">Income / Ingresos</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="label-title">How much did you make? / ¿Cuánto ganó?</label>
+                            <input type="text" id="income_amount" placeholder="$0.00" required>
+                        </div>
+                        <div>
+                            <label class="label-title">For how long? (months) / ¿Por cuánto tiempo?</label>
+                            <input type="number" id="income_months" min="1" max="12" placeholder="Meses" required>
+                        </div>
+                        <div>
+                            <label class="label-title">What proof do you have? / ¿Qué pruebas tiene?</label>
+                            <select id="income_proof" multiple class="h-24 p-2 border rounded">
+                                <option value="Receipts">Receipts / Recibo</option>
+                                <option value="Journal">Journal / Diario</option>
+                                <option value="Cancel Checks">Cancel Checks</option>
+                                <option value="Money Orders">Money Orders</option>
+                                <option value="Bank Statements">Bank Statements</option>
+                                <option value="Other">Other / Otro</option>
+                            </select>
+                            <p class="text-xs text-slate-500 mt-1">Hold Ctrl/Cmd to select multiple</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Expenses -->
+                <div class="mb-8 border-t border-slate-200 pt-6">
+                    <h4 class="font-bold text-green-800 mb-4 uppercase">Expenses / Gastos</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="label-title">Do you have any expense? / ¿Tiene gastos?</label>
+                            <div class="flex items-center gap-2 mt-2">
+                                <input type="checkbox" id="has_expenses" onchange="toggleExpenses()">
+                                <label for="has_expenses" class="font-bold">Yes, I have expenses</label>
+                            </div>
+                        </div>
+                        <div id="expense_amount_div" class="hidden">
+                            <label class="label-title">How much are your expenses? / ¿Cuánto son sus gastos?</label>
+                            <input type="text" id="expense_amount" placeholder="$0.00">
+                        </div>
+                        <div id="expense_freq_div" class="hidden">
+                            <label class="label-title">Frequency / Frecuencia</label>
+                            <select id="expense_freq">
+                                <option value="Day">Per Day / Día</option>
+                                <option value="Week">Per Week / Semana</option>
+                                <option value="Month" selected>Per Month / Mes</option>
+                                <option value="Year">Per Year / Año</option>
+                            </select>
+                        </div>
+                        <div id="expense_proof_div" class="hidden md:col-span-3">
+                            <label class="label-title">What proof do you have of these expenses? / ¿Qué pruebas tiene?</label>
+                            <select id="expense_proof" multiple class="h-24 p-2 border rounded">
+                                <option value="Receipts">Receipts / Recibo</option>
+                                <option value="Journal">Journal / Diario</option>
+                                <option value="Cancel Checks">Cancel Checks</option>
+                                <option value="Money Orders">Money Orders</option>
+                                <option value="Bank Statements">Bank Statements</option>
+                                <option value="Other">Other / Otro</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Public Assistance -->
+                <div class="border-t border-slate-200 pt-6">
+                    <h4 class="font-bold text-green-800 mb-4 uppercase">Public Assistance / Asistencia Pública</h4>
+                    <div class="flex gap-4 mt-2 flex-wrap">
+                        <label class="flex items-center gap-2 font-bold">
+                            <input type="radio" name="public_assist" value="No" checked> No
+                        </label>
+                        <label class="flex items-center gap-2 font-bold">
+                            <input type="radio" name="public_assist" value="Public Assistance"> Public Assistance
+                        </label>
+                        <label class="flex items-center gap-2 font-bold">
+                            <input type="radio" name="public_assist" value="SSI"> SSI
+                        </label>
+                        <label class="flex items-center gap-2 font-bold">
+                            <input type="radio" name="public_assist" value="Foodstamps"> Foodstamps
+                        </label>
+                        <label class="flex items-center gap-2 font-bold">
+                            <input type="radio" name="public_assist" value="Other"> Other
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 04. DECLARACIÓN JURADA -->
+            <div class="p-8 bg-slate-900 text-white rounded-b-2xl">
+                <h3 class="text-green-400 font-black mb-6 uppercase tracking-tighter text-xl italic underline decoration-2">
+                    Legal Declaration / Declaración Jurada
+                </h3>
+                <div class="text-sm text-slate-300 space-y-3 mb-6">
+                    <p>I hereby certify that all information provided is accurate and complete. I understand that I am responsible for the accuracy of all information submitted.</p>
+                    <p class="italic">Certifico que toda la información proporcionada es exacta y completa. Entiendo que soy responsable de la exactitud de toda la información presentada.</p>
+                    <p class="mt-4 font-bold">I declare under penalty of perjurio that this information is correct.</p>
+                    <p class="italic">Declaro bajo pena de perjurio que esta información es correcta.</p>
+                </div>
+
+                <!-- Signature -->
+                <div class="bg-white rounded-xl p-6">
+                    <label class="label-title mb-4">Taxpayer Signature / Firma del Contribuyente</label>
+                    <canvas id="sig_tp" class="signature-canvas w-full h-32 border-2 border-dashed border-slate-300 rounded-lg bg-slate-50"></canvas>
+                    <div class="flex justify-between items-center mt-3">
+                        <button type="button" onclick="clearSig('sig_tp')" class="text-sm font-bold text-red-500 uppercase">Clear / Limpiar</button>
+                        <span id="sig_date_display" class="text-sm text-slate-500"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUBMIT -->
+            <div class="p-8 text-center bg-slate-100 rounded-b-2xl">
+                <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white px-10 py-4 rounded-full font-black text-lg shadow-2xl transition-all transform hover:scale-105 active:scale-95 inline-flex items-center gap-3 uppercase">
+                    SUBMIT / ENVIAR
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-width="3" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                    </svg>
+                </button>
+            </div>
+        </form>
+
+        <p class="text-center text-slate-400 text-xs mt-6 uppercase font-bold tracking-widest">
+            DLA Tax Services © 2026 - Developer 
+            <a href="https://portafolio-yilson.vercel.app/" target="_blank" class="text-green-600 hover:text-green-700">YilsonDev</a>
+        </p>
+    </div>
+
+    <div id="loader" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center z-[200]">
+        <div class="bg-white p-8 rounded-2xl text-center shadow-2xl max-w-sm w-full">
+            <div class="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+            <h3 class="text-lg font-black text-slate-800 uppercase italic mb-2">Processing...</h3>
+            <p id="loader-message" class="text-sm text-slate-600 mb-4">Please wait while we process your information</p>
+            <div class="flex justify-center gap-2">
+                <div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style="animation-delay: 0s"></div>
+                <div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                <div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

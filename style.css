@@ -1,0 +1,12 @@
+body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        .section-card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); padding: 28px; margin-bottom: 24px; border: 1px solid #e2e8f0; }
+        .label-title { display: block; font-size: 0.7rem; font-weight: 800; color: #334155; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+        input[type="text"], input[type="date"], input[type="email"], input[type="number"], select, textarea {
+            width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; transition: all 0.2s; font-size: 0.9rem;
+        }
+        input:focus, select:focus { border-color: #15803d; ring: 3px ring #dcfce7; }
+        .signature-canvas { border: 2px dashed #cbd5e1; background: #fdfdfd; width: 100%; height: 160px; cursor: crosshair; touch-action: none; border-radius: 8px; }
+        .matrix-row { display: grid; grid-template-columns: 1fr 70px 70px; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
+        .matrix-row:hover { background-color: #f8fafc; }
+        .id-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 12px; padding: 12px; background: #f8fafc; border-radius: 8px; }
+        .disclaimer-item { display: grid; grid-template-columns: 1fr 80px; gap: 16px; align-items: center; padding: 12px 0; border-bottom: 1px solid #334155; }
