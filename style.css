@@ -1,10 +1,12 @@
 body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; }
         .section-card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); padding: 28px; margin-bottom: 24px; border: 1px solid #e2e8f0; }
-        .label-title { display: block; font-size: 0.7rem; font-weight: 800; color: #334155; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
-        input[type="text"], input[type="date"], input[type="email"], input[type="number"], select, textarea {
-            width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; transition: all 0.2s; font-size: 0.9rem;
+        .label-title { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #475569; margin-bottom: 4px; letter-spacing: 0.5px; }
+        input[type="text"], input[type="date"], input[type="number"], input[type="email"], select, textarea {
+            width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; transition: border-color 0.2s, box-shadow 0.2s;
         }
-        input:focus, select:focus { border-color: #15803d; ring: 3px ring #dcfce7; }
+        input:focus, select:focus, textarea:focus {
+            outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
         .signature-canvas { border: 2px dashed #cbd5e1; background: #fdfdfd; width: 100%; height: 160px; cursor: crosshair; touch-action: none; border-radius: 8px; }
         .matrix-row { display: grid; grid-template-columns: 1fr 70px 70px; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
         .matrix-row:hover { background-color: #f8fafc; }
