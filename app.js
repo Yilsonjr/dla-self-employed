@@ -300,12 +300,12 @@ document.getElementById('selfEmployedForm').addEventListener('submit', async fun
         // Signature - add proper spacing
         y += 10;
         if (formData.signature) {
-            doc.addImage(formData.signature, 'PNG', margin, y, 80, 35);
+            doc.addImage(formData.signature, 'PNG', margin, y, 75, 35);
         }
         y += 40;
         doc.setDrawColor(0);
         doc.setLineWidth(0.5);
-        doc.line(margin, y, margin + 80, y);
+        doc.line(margin, y, margin + 75, y);
         doc.setFontSize(9);
         doc.setFont(undefined, 'bold');
         doc.text('Taxpayer Signature', margin, y + 8);
