@@ -15,9 +15,14 @@
             border: 1px solid #cbd5e1;
             border-radius: 8px;
             font-size: 14px;
-            background:none;
-            color: #000;
+            background:white;
+            color: #1e293b;
             transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        /* Date picker specific styles to ensure text visibility */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            filter: invert(0.5);
         }
         input:focus, select:focus, textarea:focus {
             outline: none;
