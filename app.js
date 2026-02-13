@@ -1,9 +1,21 @@
 // Backend URL - Configure this for your deployment
 const BACKEND_URL = window.APP_CONFIG?.backendUrl || 'https://dla-tax.onrender.com';
-const today = new Date().toISOString().split('T')[0];
-document.getElementById('form_date').value = today;
-// Set default for sig_date but user can change it
-document.getElementById('sig_date').value = today;
+
+// Set dates when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Set form date
+    const formDateEl = document.getElementById('form_date');
+    if (formDateEl) formDateEl.value = today;
+    
+    // Set signature date but user can change it
+    const sigDateEl = document.getElementById('sig_date');
+    if (sigDateEl) sigDateEl.value = today;
+    
+    // Initialize signature canvas
+    initSig('sig_tp');
+});
 
 // Toggle Dependents Section
 function toggleDeps() {
@@ -96,8 +108,6 @@ function hasRealSignature(id) {
     }
     return (nonTransparentPixels / totalPixels) > 0.01;
 }
-
-initSig('sig_tp');
 
 // Form Submit
 document.getElementById('selfEmployedForm').addEventListener('submit', async function(e) {
@@ -275,17 +285,27 @@ document.getElementById('selfEmployedForm').addEventListener('submit', async fun
         const declaration = 'I hereby certify that all information provided is accurate and complete. I declare under penalty of perjurio that this information is correct.';
         const splitDeclaration = doc.splitTextToSize(declaration, pageWidth - 30);
         doc.text(splitDeclaration, margin, y);
-        y += splitDeclaration.length * 4 + 5;
+        y += splitDeclaration.length * 4 + 10;
 
-        // Signature
-        if (formData.signature) {
-            doc.addImage(formData.signature, 'PNG', margin, y, 60, 25);
+        // Check if we need a new page for signature (Letter size is ~279mm, reserve 50mm for signature)
+        if (y > 230) {
+            doc.addPage();
+            y = 20;
         }
-        y += 30;
-        doc.line(margin, y, margin + 60, y);
-        doc.setFontSize(8);
-        doc.text('Taxpayer Signature', margin, y + 5);
-        doc.text('Date: ' + formData.sig_date, margin + 70, y);
+
+        // Signature - add proper spacing
+        y += 10;
+        if (formData.signature) {
+            doc.addImage(formData.signature, 'PNG', margin, y, 80, 35);
+        }
+        y += 40;
+        doc.setDrawColor(0);
+        doc.setLineWidth(0.5);
+        doc.line(margin, y, margin + 80, y);
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.text('Taxpayer Signature', margin, y + 8);
+        doc.text('Date: ' + formData.sig_date, margin + 90, y + 8);
 
         // Save PDF
         const pdfBlob = doc.output('blob');
