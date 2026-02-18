@@ -205,77 +205,135 @@ document.getElementById('selfEmployedForm').addEventListener('submit', async fun
         const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
         let y = 15;
         const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
         const margin = 15;
         const col1 = margin;
         const col2 = margin + 50;
 
-        // Header - compact
-        doc.setFontSize(16);
+        // ═══════════════════════════════════════════════════════════════
+        // HEADER WITH DECORATIVE ELEMENTS
+        // ═══════════════════════════════════════════════════════════════
+        
+        // Header background
+        doc.setFillColor(30, 64, 124);
+        doc.rect(0, 0, pageWidth, 35, 'F');
+        
+        // Company name
+        doc.setFontSize(22);
         doc.setFont(undefined, 'bold');
-        doc.setTextColor(30, 64, 124);
-        doc.text('DLA TAX SERVICES - SELF EMPLOYED QUESTIONNAIRE', pageWidth / 2, y, { align: 'center' });
-        y += 6;
+        doc.setTextColor(255, 255, 255);
+        doc.text('DLA TAX SERVICES', pageWidth / 2, y + 5, { align: 'center' });
+        
+        // Document title
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(147, 197, 253);
+        doc.text('SELF EMPLOYED QUESTIONNAIRE', pageWidth / 2, y + 12, { align: 'center' });
+        
+        // Decorative line
+        doc.setDrawColor(147, 197, 253);
+        doc.setLineWidth(0.5);
+        doc.line(margin, y + 16, pageWidth - margin, y + 16);
+        
+        // Prepared by
+        doc.setFontSize(10);
+        doc.setTextColor(191, 219, 254);
+        doc.text('Prepared by Sergio De Los Angeles', pageWidth / 2, y + 22, { align: 'center' });
+        
+        // Date on the right
         doc.setFontSize(9);
-        doc.setTextColor(30, 64, 124);
-        doc.text('Prepared by Sergio De Los Angeles', pageWidth / 2, y, { align: 'center' });
-        y += 8;
+        doc.text('Date: ' + formData.form_date, pageWidth - margin, y + 22, { align: 'right' });
+        
+        y = 42;
 
         // Define columns for two-column layout
         const leftCol = margin;
-        const rightCol = 105;
-        const labelOffset = 28;
+        const rightCol = 108;
+        const labelOffset = 35;
         const startY = y;
 
-        // Helper function for compact fields
-        const addField = (label, value, yPos, xPos = leftCol) => {
+        // Helper function to draw section box
+        const drawSectionBox = (x, boxY, title, height) => {
+            // Section background
+            doc.setFillColor(248, 250, 252);
+            doc.roundedRect(x, boxY, 85, height, 2, 2, 'F');
+            
+            // Section header background
+            doc.setFillColor(30, 64, 124);
+            doc.roundedRect(x, boxY, 85, 7, 2, 2, 'F');
+            // Cover bottom corners of header
+            doc.setFillColor(30, 64, 124);
+            doc.rect(x, boxY + 5, 85, 2, 'F');
+            
+            // Section title
+            doc.setFontSize(10);
             doc.setFont(undefined, 'bold');
-            doc.setFontSize(8);
-            doc.text(label + ':', xPos, yPos);
-            doc.setFont(undefined, 'normal');
-            doc.text(String(value || ''), xPos + labelOffset, yPos);
-            return yPos + 4;
+            doc.setTextColor(255, 255, 255);
+            doc.text(title, x + 42.5, boxY + 5, { align: 'center' });
+            
+            // Border
+            doc.setDrawColor(30, 64, 124);
+            doc.setLineWidth(0.3);
+            doc.roundedRect(x, boxY, 85, height, 2, 2, 'S');
         };
 
-        // LEFT COLUMN: Personal Info + Dependents
-        let yLeft = startY;
+        // Helper function for fields with better spacing
+        const addField = (label, value, yPos, xPos = leftCol) => {
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(9);
+            doc.setTextColor(30, 64, 124);
+            doc.text(label + ':', xPos + 3, yPos);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(0, 0, 0);
+            doc.text(String(value || '-'), xPos + labelOffset, yPos);
+            return yPos + 6;
+        };
 
-        // PERSONAL INFORMATION - Left Column (top)
-        doc.setFontSize(9);
-        doc.setFont(undefined, 'bold');
-        doc.setTextColor(0, 0, 0);
-        doc.text('PERSONAL INFORMATION', leftCol, yLeft);
-        yLeft += 5;
+        // ═══════════════════════════════════════════════════════════════
+        // LEFT COLUMN: Personal Info + Dependents
+        // ═══════════════════════════════════════════════════════════════
+        
+        // PERSONAL INFORMATION Section
+        let boxHeight = 50;
+        drawSectionBox(leftCol, startY, 'PERSONAL INFORMATION', boxHeight);
+        
+        let yLeft = startY + 12;
         yLeft = addField('Date', formData.form_date, yLeft, leftCol);
-        yLeft = addField('Name', formData.tp_name + ' ' + formData.tp_lastname, yLeft, leftCol);
+        yLeft = addField('Full Name', formData.tp_name + ' ' + formData.tp_lastname, yLeft, leftCol);
         yLeft = addField('SSN', formData.tp_ssn, yLeft, leftCol);
         yLeft = addField('Phone', formData.tp_phone, yLeft, leftCol);
         yLeft = addField('Address', formData.addr_main, yLeft, leftCol);
         yLeft = addField('City/State/Zip', `${formData.addr_city}, ${formData.addr_state} ${formData.addr_zip}`, yLeft, leftCol);
 
-        // DEPENDENTS - Left Column (below Personal Info)
-        yLeft += 3;
-        doc.setFontSize(9);
-        doc.setFont(undefined, 'bold');
-        doc.text('DEPENDENTS', leftCol, yLeft);
-        yLeft += 5;
+        // DEPENDENTS Section
+        let depBoxY = startY + boxHeight + 5;
+        let depBoxHeight = formData.has_deps === 'Yes' && formData.dependents.length > 0 
+            ? 15 + (formData.dependents.length * 6) 
+            : 20;
+        drawSectionBox(leftCol, depBoxY, 'DEPENDENTS', depBoxHeight);
+        
+        yLeft = depBoxY + 12;
         if (formData.has_deps === 'Yes' && formData.dependents.length > 0) {
             formData.dependents.forEach((dep, i) => {
-                yLeft = addField(`#${i+1}`, `${dep.name} - Age: ${dep.age} - Mo: ${dep.months}`, yLeft, leftCol);
+                yLeft = addField(`Dependent #${i+1}`, `${dep.name} - Age: ${dep.age} - Months: ${dep.months}`, yLeft, leftCol);
             });
         } else {
-            yLeft = addField('Status', 'No dependents', yLeft, leftCol);
+            doc.setFontSize(9);
+            doc.setTextColor(100, 100, 100);
+            doc.text('No dependents reported', leftCol + 3, yLeft);
         }
 
+        // ═══════════════════════════════════════════════════════════════
         // RIGHT COLUMN: Financial Data + Business Info
-        let yRight = startY;
-
-        // FINANCIAL DATA - Right Column (top)
-        doc.setFontSize(9);
-        doc.setFont(undefined, 'bold');
-        doc.text('FINANCIAL DATA', rightCol, yRight);
-        yRight += 5;
+        // ═══════════════════════════════════════════════════════════════
+        
+        // FINANCIAL DATA Section
+        let finBoxHeight = formData.has_expenses ? 62 : 44;
+        drawSectionBox(rightCol, startY, 'FINANCIAL DATA', finBoxHeight);
+        
+        let yRight = startY + 12;
         yRight = addField('Income Amount', formData.income_amount, yRight, rightCol);
-        yRight = addField('Duration (Months)', formData.income_months, yRight, rightCol);
+        yRight = addField('Duration', formData.income_months + ' months', yRight, rightCol);
         yRight = addField('Income Proof', formData.income_proof.join(', '), yRight, rightCol);
         yRight = addField('Has Expenses', formData.has_expenses ? 'Yes' : 'No', yRight, rightCol);
         if (formData.has_expenses) {
@@ -285,54 +343,123 @@ document.getElementById('selfEmployedForm').addEventListener('submit', async fun
         }
         yRight = addField('Public Assist', formData.public_assist, yRight, rightCol);
 
-        // BUSINESS INFORMATION - Right Column (below Financial Data)
-        yRight += 3;
-        doc.setFontSize(9);
-        doc.setFont(undefined, 'bold');
-        doc.text('BUSINESS INFORMATION', rightCol, yRight);
-        yRight += 5;
+        // BUSINESS INFORMATION Section
+        let bizBoxY = startY + finBoxHeight + 5;
+        let bizBoxHeight = 45;
+        if (formData.biz_in_house === 'No' && !formData.use_personal_address) {
+            bizBoxHeight = 62;
+        }
+        drawSectionBox(rightCol, bizBoxY, 'BUSINESS INFORMATION', bizBoxHeight);
+        
+        yRight = bizBoxY + 12;
         yRight = addField('Business Type', formData.business_type, yRight, rightCol);
         yRight = addField('In Your House', formData.biz_in_house, yRight, rightCol);
         
         if (formData.biz_in_house === 'No') {
             if (formData.use_personal_address) {
-                yRight = addField('Address Type', 'Same as Personal', yRight, rightCol);
+                yRight = addField('Address', 'Same as Personal', yRight, rightCol);
             } else {
-                yRight = addField('Biz Name', formData.biz_name, yRight, rightCol);
-                yRight = addField('Biz Address', formData.biz_addr, yRight, rightCol);
+                yRight = addField('Business Name', formData.biz_name, yRight, rightCol);
+                yRight = addField('Address', formData.biz_addr, yRight, rightCol);
                 yRight = addField('City/State/Zip', `${formData.biz_city}, ${formData.biz_state} ${formData.biz_zip}`, yRight, rightCol);
-                yRight = addField('Biz Phone', formData.biz_phone, yRight, rightCol);
+                yRight = addField('Phone', formData.biz_phone, yRight, rightCol);
                 yRight = addField('Contact', formData.biz_contact, yRight, rightCol);
             }
         } else {
             yRight = addField('Income Calc', formData.biz_income_calc, yRight, rightCol);
         }
 
-        // Continue from the taller column
-        y = Math.max(yLeft, yRight) + 5;
+        // ═══════════════════════════════════════════════════════════════
+        // LEGAL DECLARATION SECTION
+        // ═══════════════════════════════════════════════════════════════
+        
+        y = Math.max(depBoxY + depBoxHeight, bizBoxY + bizBoxHeight) + 10;
+        
+        // Declaration box
+        doc.setFillColor(15, 23, 42);
+        doc.roundedRect(margin, y, pageWidth - (margin * 2), 35, 3, 3, 'F');
+        
+        // Declaration title
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(74, 222, 128);
+        doc.text('LEGAL DECLARATION', margin + 5, y + 8);
+        
+        // Declaration text
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(203, 213, 225);
+        const declaration = 'I hereby certify that all information provided is accurate and complete. I declare under penalty of perjury that this information is correct. I understand that I am responsible for the accuracy of all information submitted.';
+        const splitDeclaration = doc.splitTextToSize(declaration, pageWidth - (margin * 2) - 10);
+        doc.text(splitDeclaration, margin + 5, y + 15);
+        
+        y += 40;
 
-        // Legal Declaration - compact
+        // ═══════════════════════════════════════════════════════════════
+        // SIGNATURE SECTION
+        // ═══════════════════════════════════════════════════════════════
+        
+        // Signature box
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(30, 64, 124);
+        doc.setLineWidth(0.5);
+        doc.roundedRect(margin, y, pageWidth - (margin * 2), 45, 3, 3, 'FD');
+        
+        // Signature label
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(30, 64, 124);
+        doc.text('TAXPAYER SIGNATURE', margin + 5, y + 8);
+        
+        // Signature image
+        if (formData.signature) {
+            doc.addImage(formData.signature, 'PNG', margin + 5, y + 12, 60, 22);
+        }
+        
+        // Signature line
+        doc.setDrawColor(100, 100, 100);
+        doc.setLineWidth(0.3);
+        doc.line(margin + 5, y + 36, margin + 65, y + 36);
+        
+        // Signature label under line
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(100, 100, 100);
+        doc.text('Taxpayer Signature', margin + 35, y + 41, { align: 'center' });
+        
+        // Date field
         doc.setFontSize(9);
         doc.setFont(undefined, 'bold');
-        doc.text('LEGAL DECLARATION', leftCol, y);
-        y += 4;
-        doc.setFontSize(7);
+        doc.setTextColor(30, 64, 124);
+        doc.text('Date:', margin + 75, y + 25);
         doc.setFont(undefined, 'normal');
-        const declaration = 'I hereby certify that all information provided is accurate and complete. I declare under penalty of perjury that this information is correct.';
-        doc.text(declaration, leftCol, y);
-        y += 8;
+        doc.setTextColor(0, 0, 0);
+        doc.text(formData.sig_date, margin + 85, y + 25);
+        
+        // Date line
+        doc.setDrawColor(100, 100, 100);
+        doc.line(margin + 75, y + 28, margin + 130, y + 28);
 
-        // Signature section - compact, at bottom
-        if (formData.signature) {
-            doc.addImage(formData.signature, 'PNG', leftCol, y, 40, 15);
-        }
-        doc.setDrawColor(0);
-        doc.setLineWidth(0.3);
-        doc.line(leftCol, y + 18, leftCol + 40, y + 18);
+        // ═══════════════════════════════════════════════════════════════
+        // FOOTER
+        // ═══════════════════════════════════════════════════════════════
+        
+        // Footer line
+        doc.setDrawColor(30, 64, 124);
+        doc.setLineWidth(0.5);
+        doc.line(margin, pageHeight - 20, pageWidth - margin, pageHeight - 20);
+        
+        // Footer text
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(100, 100, 100);
+        doc.text('DLA Tax Services | Prepared by Sergio De Los Angeles', margin, pageHeight - 15);
+        doc.text('Page 1 of 1', pageWidth - margin, pageHeight - 15, { align: 'right' });
+        
+        // Confidential notice
         doc.setFontSize(7);
-        doc.setFont(undefined, 'bold');
-        doc.text('Taxpayer Signature', leftCol, y + 23);
-        doc.text('Date: ' + formData.sig_date, leftCol + 50, y + 23);
+        doc.setTextColor(150, 150, 150);
+        doc.text('CONFIDENTIAL - This document contains sensitive tax information', pageWidth / 2, pageHeight - 10, { align: 'center' });
 
         // Save PDF
         const pdfBlob = doc.output('blob');
@@ -361,7 +488,7 @@ document.getElementById('selfEmployedForm').addEventListener('submit', async fun
         await Swal.fire({
             icon: 'success',
             title: 'Success!',
-            text: 'Form submitted successfully. Check your email for the PDF.',
+            text: 'Form submitted successfully...',
             confirmButtonColor: '#16a34a'
         });
 
