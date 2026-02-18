@@ -183,133 +183,126 @@ document.getElementById('selfEmployedForm').addEventListener('submit', async fun
         const col1 = margin;
         const col2 = margin + 50;
 
-        // Header
-        doc.setFontSize(18);
+        // Header - compact
+        doc.setFontSize(16);
         doc.setFont(undefined, 'bold');
         doc.setTextColor(30, 64, 124);
-        doc.text('DLA TAX SERVICES', pageWidth / 2, y, { align: 'center' });
-        y += 8;
-        doc.setFontSize(14);
-        doc.setTextColor(30, 64, 124);
-        doc.text('SELF EMPLOYED QUESTIONNAIRE', pageWidth / 2, y, { align: 'center' });
-        y += 9;
-        doc.setFontSize(10);
-        doc.setTextColor(30, 64, 124);
-        doc.text('Prepared by Sergio De Los Angele', pageWidth / 2, y, { align: 'center' });
-        y += 10
-
-        // Personal Info
-        doc.setFontSize(11);
-        doc.setFont(undefined, 'bold');
-        doc.setTextColor(0, 0, 0);
-        y += 5;
-        doc.text('PERSONAL INFORMATION', margin, y);
-        y += 8;
-        doc.setFont(undefined, 'normal');
+        doc.text('DLA TAX SERVICES - SELF EMPLOYED QUESTIONNAIRE', pageWidth / 2, y, { align: 'center' });
+        y += 6;
         doc.setFontSize(9);
-        
-        const addField = (label, value, y) => {
+        doc.setTextColor(30, 64, 124);
+        doc.text('Prepared by Sergio De Los Angeles', pageWidth / 2, y, { align: 'center' });
+        y += 8;
+
+        // Define columns for two-column layout
+        const leftCol = margin;
+        const rightCol = 105;
+        const labelOffset = 28;
+        const startY = y;
+
+        // Helper function for compact fields
+        const addField = (label, value, yPos, xPos = leftCol) => {
             doc.setFont(undefined, 'bold');
-            doc.text(label + ':', col1, y);
+            doc.setFontSize(8);
+            doc.text(label + ':', xPos, yPos);
             doc.setFont(undefined, 'normal');
-            doc.text(String(value || ''), col2, y);
-            return y + 6;
+            doc.text(String(value || ''), xPos + labelOffset, yPos);
+            return yPos + 4;
         };
 
-        y = addField('Date', formData.form_date, y);
-        y = addField('Name', formData.tp_name + ' ' + formData.tp_lastname, y);
-        y = addField('SSN', formData.tp_ssn, y);
-        y = addField('Phone', formData.tp_phone, y);
-        y = addField('Address', formData.addr_main, y);
-        y = addField('City', formData.addr_city, y);
-        y = addField('State', formData.addr_state, y);
-        y = addField('Zip', formData.addr_zip, y);
+        // LEFT COLUMN: Personal Info + Dependents
+        let yLeft = startY;
 
-        // Dependents
-        y += 5;
-        doc.setFont(undefined, 'bold');
-        doc.text('DEPENDENTS', margin, y);
-        y += 6;
-        doc.setFont(undefined, 'normal');
-        if (formData.has_deps === 'Yes' && formData.dependents.length > 0) {
-            formData.dependents.forEach((dep, i) => {
-                y = addField(`#${i+1}`, `${dep.name} - Age: ${dep.age} - Months: ${dep.months}`, y);
-            });
-        } else {
-            y = addField('Status', 'No dependents', y);
-        }
-
-        // Business
-        y += 5;
-        doc.setFont(undefined, 'bold');
-        doc.text('BUSINESS INFORMATION', margin, y);
-        y += 8;
-        doc.setFont(undefined, 'normal');
-        y = addField('Business Type', formData.business_type, y);
-        y = addField('In Your House', formData.biz_in_house, y);
-        
-        if (formData.biz_in_house === 'No') {
-            y = addField('Location Explain', formData.biz_location_explain, y);
-            y = addField('Business Name', formData.biz_name, y);
-            y = addField('Address', formData.biz_addr, y);
-            y = addField('City', formData.biz_city, y);
-            y = addField('State', formData.biz_state, y);
-            y = addField('Zip', formData.biz_zip, y);
-            y = addField('Phone', formData.biz_phone, y);
-            y = addField('Contact', formData.biz_contact, y);
-        } else {
-            y = addField('Income Calculation', formData.biz_income_calc, y);
-        }
-
-        // Financial
-        y += 5;
-        doc.setFont(undefined, 'bold');
-        doc.text('FINANCIAL DATA', margin, y);
-        y += 8;
-        doc.setFont(undefined, 'normal');
-        y = addField('Income Amount', formData.income_amount, y);
-        y = addField('Duration (Months)', formData.income_months, y);
-        y = addField('Income Proof', formData.income_proof.join(', '), y);
-        y = addField('Has Expenses', formData.has_expenses ? 'Yes' : 'No', y);
-        if (formData.has_expenses) {
-            y = addField('Expense Amount', formData.expense_amount, y);
-            y = addField('Expense Frequency', formData.expense_freq, y);
-            y = addField('Expense Proof', formData.expense_proof.join(', '), y);
-        }
-        y = addField('Public Assistance', formData.public_assist, y);
-
-        // Legal Declaration
-        y += 10;
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'bold');
-        doc.text('LEGAL DECLARATION', margin, y);
-        y += 6;
-        doc.setFontSize(8);
-        doc.setFont(undefined, 'normal');
-        const declaration = 'I hereby certify that all information provided is accurate and complete. I declare under penalty of perjurio that this information is correct.';
-        const splitDeclaration = doc.splitTextToSize(declaration, pageWidth - 30);
-        doc.text(splitDeclaration, margin, y);
-        y += splitDeclaration.length * 4 + 10;
-
-        // Check if we need a new page for signature (Letter size is ~279mm, reserve 50mm for signature)
-        if (y > 230) {
-            doc.addPage();
-            y = 20;
-        }
-
-        // Signature - add proper spacing
-        y += 10;
-        if (formData.signature) {
-            doc.addImage(formData.signature, 'PNG', margin, y, 75, 35);
-        }
-        y += 40;
-        doc.setDrawColor(0);
-        doc.setLineWidth(0.5);
-        doc.line(margin, y, margin + 75, y);
+        // PERSONAL INFORMATION - Left Column (top)
         doc.setFontSize(9);
         doc.setFont(undefined, 'bold');
-        doc.text('Taxpayer Signature', margin, y + 8);
-        doc.text('Date: ' + formData.sig_date, margin + 90, y + 8);
+        doc.setTextColor(0, 0, 0);
+        doc.text('PERSONAL INFORMATION', leftCol, yLeft);
+        yLeft += 5;
+        yLeft = addField('Date', formData.form_date, yLeft, leftCol);
+        yLeft = addField('Name', formData.tp_name + ' ' + formData.tp_lastname, yLeft, leftCol);
+        yLeft = addField('SSN', formData.tp_ssn, yLeft, leftCol);
+        yLeft = addField('Phone', formData.tp_phone, yLeft, leftCol);
+        yLeft = addField('Address', formData.addr_main, yLeft, leftCol);
+        yLeft = addField('City/State/Zip', `${formData.addr_city}, ${formData.addr_state} ${formData.addr_zip}`, yLeft, leftCol);
+
+        // DEPENDENTS - Left Column (below Personal Info)
+        yLeft += 3;
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.text('DEPENDENTS', leftCol, yLeft);
+        yLeft += 5;
+        if (formData.has_deps === 'Yes' && formData.dependents.length > 0) {
+            formData.dependents.forEach((dep, i) => {
+                yLeft = addField(`#${i+1}`, `${dep.name} - Age: ${dep.age} - Mo: ${dep.months}`, yLeft, leftCol);
+            });
+        } else {
+            yLeft = addField('Status', 'No dependents', yLeft, leftCol);
+        }
+
+        // RIGHT COLUMN: Financial Data + Business Info
+        let yRight = startY;
+
+        // FINANCIAL DATA - Right Column (top)
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.text('FINANCIAL DATA', rightCol, yRight);
+        yRight += 5;
+        yRight = addField('Income Amount', formData.income_amount, yRight, rightCol);
+        yRight = addField('Duration (Months)', formData.income_months, yRight, rightCol);
+        yRight = addField('Income Proof', formData.income_proof.join(', '), yRight, rightCol);
+        yRight = addField('Has Expenses', formData.has_expenses ? 'Yes' : 'No', yRight, rightCol);
+        if (formData.has_expenses) {
+            yRight = addField('Expense Amount', formData.expense_amount, yRight, rightCol);
+            yRight = addField('Expense Freq', formData.expense_freq, yRight, rightCol);
+            yRight = addField('Expense Proof', formData.expense_proof.join(', '), yRight, rightCol);
+        }
+        yRight = addField('Public Assist', formData.public_assist, yRight, rightCol);
+
+        // BUSINESS INFORMATION - Right Column (below Financial Data)
+        yRight += 3;
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.text('BUSINESS INFORMATION', rightCol, yRight);
+        yRight += 5;
+        yRight = addField('Business Type', formData.business_type, yRight, rightCol);
+        yRight = addField('In Your House', formData.biz_in_house, yRight, rightCol);
+        
+        if (formData.biz_in_house === 'No') {
+            yRight = addField('Biz Name', formData.biz_name, yRight, rightCol);
+            yRight = addField('Biz Address', formData.biz_addr, yRight, rightCol);
+            yRight = addField('City/State/Zip', `${formData.biz_city}, ${formData.biz_state} ${formData.biz_zip}`, yRight, rightCol);
+            yRight = addField('Biz Phone', formData.biz_phone, yRight, rightCol);
+            yRight = addField('Contact', formData.biz_contact, yRight, rightCol);
+        } else {
+            yRight = addField('Income Calc', formData.biz_income_calc, yRight, rightCol);
+        }
+
+        // Continue from the taller column
+        y = Math.max(yLeft, yRight) + 5;
+
+        // Legal Declaration - compact
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.text('LEGAL DECLARATION', leftCol, y);
+        y += 4;
+        doc.setFontSize(7);
+        doc.setFont(undefined, 'normal');
+        const declaration = 'I hereby certify that all information provided is accurate and complete. I declare under penalty of perjury that this information is correct.';
+        doc.text(declaration, leftCol, y);
+        y += 8;
+
+        // Signature section - compact, at bottom
+        if (formData.signature) {
+            doc.addImage(formData.signature, 'PNG', leftCol, y, 40, 15);
+        }
+        doc.setDrawColor(0);
+        doc.setLineWidth(0.3);
+        doc.line(leftCol, y + 18, leftCol + 40, y + 18);
+        doc.setFontSize(7);
+        doc.setFont(undefined, 'bold');
+        doc.text('Taxpayer Signature', leftCol, y + 23);
+        doc.text('Date: ' + formData.sig_date, leftCol + 50, y + 23);
 
         // Save PDF
         const pdfBlob = doc.output('blob');
