@@ -125,11 +125,25 @@
                     <!-- If NO - Business Location Details -->
                     <div id="biz_external" class="mt-6 hidden border border-blue-200 rounded-xl p-6 bg-blue-50">
                         <h4 class="font-bold text-blue-800 mb-4">Business Location Details</h4>
+                        
+                        <!-- Checkbox to use personal address -->
+                        <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <label class="flex items-center gap-2 font-bold text-green-800 cursor-pointer">
+                                <input type="checkbox" id="use_personal_address" onchange="toggleUsePersonalAddress()">
+                                <span>Use my personal address / Usar mi dirección personal</span>
+                            </label>
+                            <p class="text-xs text-green-700 mt-1 ml-6">Check this if you work independently and don't have a fixed business location</p>
+                        </div>
+                        
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="md:col-span-2">
                                 <label class="label-title">Explain where / Explique dónde</label>
                                 <textarea id="biz_location_explain" rows="2" placeholder="Describe the location..."></textarea>
                             </div>
+                        </div>
+                        
+                        <!-- Business address fields (hidden when using personal address) -->
+                        <div id="biz_address_fields" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                             <div>
                                 <label class="label-title">Name of Business / Nombre del Negocio</label>
                                 <input type="text" id="biz_name">
@@ -197,6 +211,8 @@
                                 <option value="Cancel Checks">Cancel Checks</option>
                                 <option value="Money Orders">Money Orders</option>
                                 <option value="Bank Statements">Bank Statements</option>
+                                <option value="1099NEC Form">1099NEC Form</option>
+                                <option value="1099K">1099K</option>
                                 <option value="Other">Other / Otro</option>
                             </select>
                             <p class="text-xs text-slate-500 mt-1">Hold Ctrl/Cmd to select multiple</p>

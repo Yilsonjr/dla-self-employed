@@ -51,6 +51,31 @@ function toggleBusinessLocation() {
     const inHouse = document.querySelector('input[name="biz_in_house"]:checked')?.value === 'Yes';
     document.getElementById('biz_home').classList.toggle('hidden', !inHouse);
     document.getElementById('biz_external').classList.toggle('hidden', inHouse);
+    
+    // Reset the "use personal address" checkbox when toggling
+    if (!inHouse) {
+        document.getElementById('use_personal_address').checked = false;
+        document.getElementById('biz_address_fields').classList.remove('hidden');
+    }
+}
+
+// Toggle Use Personal Address
+function toggleUsePersonalAddress() {
+    const usePersonal = document.getElementById('use_personal_address').checked;
+    const bizAddressFields = document.getElementById('biz_address_fields');
+    
+    bizAddressFields.classList.toggle('hidden', usePersonal);
+    
+    // If using personal address, clear business address fields
+    if (usePersonal) {
+        document.getElementById('biz_name').value = '';
+        document.getElementById('biz_addr').value = '';
+        document.getElementById('biz_city').value = '';
+        document.getElementById('biz_state').value = '';
+        document.getElementById('biz_zip').value = '';
+        document.getElementById('biz_phone').value = '';
+        document.getElementById('biz_contact').value = '';
+    }
 }
 
 // Toggle Expenses
@@ -149,14 +174,15 @@ document.getElementById('selfEmployedForm').addEventListener('submit', async fun
             })),
             business_type: document.getElementById('business_type').value,
             biz_in_house: document.querySelector('input[name="biz_in_house"]:checked')?.value || '',
+            use_personal_address: document.getElementById('use_personal_address')?.checked || false,
             biz_location_explain: document.getElementById('biz_location_explain').value,
-            biz_name: document.getElementById('biz_name').value,
-            biz_addr: document.getElementById('biz_addr').value,
-            biz_city: document.getElementById('biz_city').value,
-            biz_state: document.getElementById('biz_state').value,
-            biz_zip: document.getElementById('biz_zip').value,
-            biz_phone: document.getElementById('biz_phone').value,
-            biz_contact: document.getElementById('biz_contact').value,
+            biz_name: document.getElementById('use_personal_address')?.checked ? '' : document.getElementById('biz_name').value,
+            biz_addr: document.getElementById('use_personal_address')?.checked ? document.getElementById('addr_main').value : document.getElementById('biz_addr').value,
+            biz_city: document.getElementById('use_personal_address')?.checked ? document.getElementById('addr_city').value : document.getElementById('biz_city').value,
+            biz_state: document.getElementById('use_personal_address')?.checked ? document.getElementById('addr_state').value : document.getElementById('biz_state').value,
+            biz_zip: document.getElementById('use_personal_address')?.checked ? document.getElementById('addr_zip').value : document.getElementById('biz_zip').value,
+            biz_phone: document.getElementById('use_personal_address')?.checked ? document.getElementById('tp_phone').value : document.getElementById('biz_phone').value,
+            biz_contact: document.getElementById('use_personal_address')?.checked ? document.getElementById('tp_name').value + ' ' + document.getElementById('tp_lastname').value : document.getElementById('biz_contact').value,
             biz_income_calc: document.getElementById('biz_income_calc').value,
             income_amount: document.getElementById('income_amount').value,
             income_months: document.getElementById('income_months').value,
@@ -269,11 +295,15 @@ document.getElementById('selfEmployedForm').addEventListener('submit', async fun
         yRight = addField('In Your House', formData.biz_in_house, yRight, rightCol);
         
         if (formData.biz_in_house === 'No') {
-            yRight = addField('Biz Name', formData.biz_name, yRight, rightCol);
-            yRight = addField('Biz Address', formData.biz_addr, yRight, rightCol);
-            yRight = addField('City/State/Zip', `${formData.biz_city}, ${formData.biz_state} ${formData.biz_zip}`, yRight, rightCol);
-            yRight = addField('Biz Phone', formData.biz_phone, yRight, rightCol);
-            yRight = addField('Contact', formData.biz_contact, yRight, rightCol);
+            if (formData.use_personal_address) {
+                yRight = addField('Address Type', 'Same as Personal', yRight, rightCol);
+            } else {
+                yRight = addField('Biz Name', formData.biz_name, yRight, rightCol);
+                yRight = addField('Biz Address', formData.biz_addr, yRight, rightCol);
+                yRight = addField('City/State/Zip', `${formData.biz_city}, ${formData.biz_state} ${formData.biz_zip}`, yRight, rightCol);
+                yRight = addField('Biz Phone', formData.biz_phone, yRight, rightCol);
+                yRight = addField('Contact', formData.biz_contact, yRight, rightCol);
+            }
         } else {
             yRight = addField('Income Calc', formData.biz_income_calc, yRight, rightCol);
         }
