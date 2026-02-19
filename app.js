@@ -342,27 +342,95 @@ document.getElementById('selfEmployedForm').addEventListener('submit', async fun
             doc.setFont(undefined, 'normal');
             doc.setTextColor(0, 0, 0);
             
-            // Truncate long text to fit in box
+            // Split long text into multiple lines
             let displayValue = String(value || '-');
-            const textWidth = doc.getTextWidth(displayValue);
-            if (textWidth > maxTextWidth) {
-                // Truncate and add ellipsis
-                while (doc.getTextWidth(displayValue + '...') > maxTextWidth && displayValue.length > 0) {
-                    displayValue = displayValue.slice(0, -1);
+            const lines = doc.splitTextToSize(displayValue, maxTextWidth);
+            
+            // Draw each line
+            lines.forEach((line, index) => {
+                if (index === 0) {
+                    doc.text(line, xPos + labelOffset, yPos);
+                } else {
+                    // Subsequent lines start at the same x position as the value
+                    doc.text(line, xPos + labelOffset, yPos + (index * 5));
                 }
-                displayValue += '...';
-            }
-            doc.text(displayValue, xPos + labelOffset, yPos);
-            return yPos + 6;
+            });
+            
+            // Return the next Y position based on number of lines
+            return yPos + 6 + ((lines.length - 1) * 5);
         };
+
+        // Helper function to calculate field height
+        const calculateFieldHeight = (value) => {
+            let displayValue = String(value || '-');
+            const lines = doc.splitTextToSize(displayValue, maxTextWidth);
+            return 6 + ((lines.length - 1) * 5);
+        };
+
+        // ═══════════════════════════════════════════════════════════════
+        // CALCULATE BOX HEIGHTS FIRST
+        // ═══════════════════════════════════════════════════════════════
+        
+        // Personal Info height
+        let personalHeight = 12; // header
+        personalHeight += calculateFieldHeight(formData.form_date);
+        personalHeight += calculateFieldHeight(formData.tp_name + ' ' + formData.tp_lastname);
+        personalHeight += calculateFieldHeight(formData.tp_ssn);
+        personalHeight += calculateFieldHeight(formData.tp_phone);
+        personalHeight += calculateFieldHeight(formData.addr_main);
+        personalHeight += calculateFieldHeight(`${formData.addr_city}, ${formData.addr_state} ${formData.addr_zip}`);
+        personalHeight += 5; // bottom padding
+
+        // Dependents height
+        let depHeight = 12; // header
+        if (formData.has_deps === 'Yes' && formData.dependents.length > 0) {
+            formData.dependents.forEach((dep, i) => {
+                depHeight += calculateFieldHeight(`${dep.name} - Age: ${dep.age} - Months: ${dep.months}`);
+            });
+        } else {
+            depHeight += 6;
+        }
+        depHeight += 5; // bottom padding
+
+        // Financial Data height
+        let finHeight = 12; // header
+        finHeight += calculateFieldHeight(formData.income_amount);
+        finHeight += calculateFieldHeight(formData.income_months + ' months');
+        finHeight += calculateFieldHeight(formData.income_proof.join(', '));
+        finHeight += calculateFieldHeight(formData.has_expenses ? 'Yes' : 'No');
+        if (formData.has_expenses) {
+            finHeight += calculateFieldHeight(formData.expense_amount);
+            finHeight += calculateFieldHeight(formData.expense_freq);
+            finHeight += calculateFieldHeight(formData.expense_proof.join(', '));
+        }
+        finHeight += calculateFieldHeight(formData.public_assist);
+        finHeight += 5; // bottom padding
+
+        // Business Info height
+        let bizHeight = 12; // header
+        bizHeight += calculateFieldHeight(formData.business_type);
+        bizHeight += calculateFieldHeight(formData.biz_in_house);
+        if (formData.biz_in_house === 'No') {
+            if (formData.use_personal_address) {
+                bizHeight += calculateFieldHeight('Same as Personal');
+            } else {
+                bizHeight += calculateFieldHeight(formData.biz_name);
+                bizHeight += calculateFieldHeight(formData.biz_addr);
+                bizHeight += calculateFieldHeight(`${formData.biz_city}, ${formData.biz_state} ${formData.biz_zip}`);
+                bizHeight += calculateFieldHeight(formData.biz_phone);
+                bizHeight += calculateFieldHeight(formData.biz_contact);
+            }
+        } else {
+            bizHeight += calculateFieldHeight(formData.biz_income_calc);
+        }
+        bizHeight += 5; // bottom padding
 
         // ═══════════════════════════════════════════════════════════════
         // LEFT COLUMN: Personal Info + Dependents
         // ═══════════════════════════════════════════════════════════════
         
         // PERSONAL INFORMATION Section
-        let boxHeight = 50;
-        drawSectionBox(leftCol, startY, 'PERSONAL INFORMATION', boxHeight);
+        drawSectionBox(leftCol, startY, 'PERSONAL INFORMATION', personalHeight);
         
         let yLeft = startY + 12;
         yLeft = addField('Date', formData.form_date, yLeft, leftCol);
@@ -373,11 +441,8 @@ document.getElementById('selfEmployedForm').addEventListener('submit', async fun
         yLeft = addField('City/State/Zip', `${formData.addr_city}, ${formData.addr_state} ${formData.addr_zip}`, yLeft, leftCol);
 
         // DEPENDENTS Section
-        let depBoxY = startY + boxHeight + 5;
-        let depBoxHeight = formData.has_deps === 'Yes' && formData.dependents.length > 0 
-            ? 15 + (formData.dependents.length * 6) 
-            : 20;
-        drawSectionBox(leftCol, depBoxY, 'DEPENDENTS', depBoxHeight);
+        let depBoxY = startY + personalHeight + 5;
+        drawSectionBox(leftCol, depBoxY, 'DEPENDENTS', depHeight);
         
         yLeft = depBoxY + 12;
         if (formData.has_deps === 'Yes' && formData.dependents.length > 0) {
@@ -395,8 +460,7 @@ document.getElementById('selfEmployedForm').addEventListener('submit', async fun
         // ═══════════════════════════════════════════════════════════════
         
         // FINANCIAL DATA Section
-        let finBoxHeight = formData.has_expenses ? 62 : 44;
-        drawSectionBox(rightCol, startY, 'FINANCIAL DATA', finBoxHeight);
+        drawSectionBox(rightCol, startY, 'FINANCIAL DATA', finHeight);
         
         let yRight = startY + 12;
         yRight = addField('Income Amount', formData.income_amount, yRight, rightCol);
@@ -411,12 +475,8 @@ document.getElementById('selfEmployedForm').addEventListener('submit', async fun
         yRight = addField('Public Assist', formData.public_assist, yRight, rightCol);
 
         // BUSINESS INFORMATION Section
-        let bizBoxY = startY + finBoxHeight + 5;
-        let bizBoxHeight = 45;
-        if (formData.biz_in_house === 'No' && !formData.use_personal_address) {
-            bizBoxHeight = 62;
-        }
-        drawSectionBox(rightCol, bizBoxY, 'BUSINESS INFORMATION', bizBoxHeight);
+        let bizBoxY = startY + finHeight + 5;
+        drawSectionBox(rightCol, bizBoxY, 'BUSINESS INFORMATION', bizHeight);
         
         yRight = bizBoxY + 12;
         yRight = addField('Business Type', formData.business_type, yRight, rightCol);
@@ -440,7 +500,7 @@ document.getElementById('selfEmployedForm').addEventListener('submit', async fun
         // LEGAL DECLARATION SECTION
         // ═══════════════════════════════════════════════════════════════
         
-        y = Math.max(depBoxY + depBoxHeight, bizBoxY + bizBoxHeight) + 10;
+        y = Math.max(depBoxY + depHeight, bizBoxY + bizHeight) + 10;
         
         // Declaration box
         doc.setFillColor(15, 23, 42);
