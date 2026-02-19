@@ -266,78 +266,93 @@ document.getElementById('selfEmployedForm').addEventListener('submit', async fun
         // HEADER WITH DECORATIVE ELEMENTS
         // ═══════════════════════════════════════════════════════════════
         
-        // Header background
+        // Header background - increased height to 40mm
         doc.setFillColor(30, 64, 124);
-        doc.rect(0, 0, pageWidth, 35, 'F');
+        doc.rect(0, 0, pageWidth, 40, 'F');
         
         // Company name
-        doc.setFontSize(22);
+        doc.setFontSize(20);
         doc.setFont(undefined, 'bold');
         doc.setTextColor(255, 255, 255);
         doc.text('DLA TAX SERVICES', pageWidth / 2, y + 5, { align: 'center' });
         
         // Document title
-        doc.setFontSize(14);
+        doc.setFontSize(12);
         doc.setFont(undefined, 'normal');
         doc.setTextColor(147, 197, 253);
-        doc.text('SELF EMPLOYED QUESTIONNAIRE', pageWidth / 2, y + 12, { align: 'center' });
+        doc.text('SELF EMPLOYED QUESTIONNAIRE', pageWidth / 2, y + 11, { align: 'center' });
         
         // Decorative line
         doc.setDrawColor(147, 197, 253);
         doc.setLineWidth(0.5);
-        doc.line(margin, y + 16, pageWidth - margin, y + 16);
+        doc.line(margin, y + 15, pageWidth - margin, y + 15);
         
-        // Prepared by
-        doc.setFontSize(10);
-        doc.setTextColor(191, 219, 254);
-        doc.text('Prepared by Sergio De Los Angeles', pageWidth / 2, y + 22, { align: 'center' });
-        
-        // Date on the right
+        // Prepared by - centered
         doc.setFontSize(9);
-        doc.text('Date: ' + formData.form_date, pageWidth - margin, y + 22, { align: 'right' });
+        doc.setTextColor(191, 219, 254);
+        doc.text('Prepared by Sergio De Los Angeles', pageWidth / 2, y + 21, { align: 'center' });
         
-        y = 42;
+        // Date on the right - inside header
+        doc.setFontSize(9);
+        doc.setTextColor(255, 255, 255);
+        doc.text('Date: ' + formData.form_date, pageWidth - margin - 5, y + 21, { align: 'right' });
+        
+        y = 45;
 
         // Define columns for two-column layout
         const leftCol = margin;
         const rightCol = 108;
         const labelOffset = 35;
         const startY = y;
+        const boxWidth = 85;
+        const maxTextWidth = boxWidth - labelOffset - 5; // Max width for value text
 
         // Helper function to draw section box
         const drawSectionBox = (x, boxY, title, height) => {
             // Section background
             doc.setFillColor(248, 250, 252);
-            doc.roundedRect(x, boxY, 85, height, 2, 2, 'F');
+            doc.roundedRect(x, boxY, boxWidth, height, 2, 2, 'F');
             
             // Section header background
             doc.setFillColor(30, 64, 124);
-            doc.roundedRect(x, boxY, 85, 7, 2, 2, 'F');
+            doc.roundedRect(x, boxY, boxWidth, 7, 2, 2, 'F');
             // Cover bottom corners of header
             doc.setFillColor(30, 64, 124);
-            doc.rect(x, boxY + 5, 85, 2, 'F');
+            doc.rect(x, boxY + 5, boxWidth, 2, 'F');
             
             // Section title
             doc.setFontSize(10);
             doc.setFont(undefined, 'bold');
             doc.setTextColor(255, 255, 255);
-            doc.text(title, x + 42.5, boxY + 5, { align: 'center' });
+            doc.text(title, x + boxWidth / 2, boxY + 5, { align: 'center' });
             
             // Border
             doc.setDrawColor(30, 64, 124);
             doc.setLineWidth(0.3);
-            doc.roundedRect(x, boxY, 85, height, 2, 2, 'S');
+            doc.roundedRect(x, boxY, boxWidth, height, 2, 2, 'S');
         };
 
-        // Helper function for fields with better spacing
+        // Helper function for fields with text wrapping
         const addField = (label, value, yPos, xPos = leftCol) => {
             doc.setFont(undefined, 'bold');
             doc.setFontSize(9);
             doc.setTextColor(30, 64, 124);
             doc.text(label + ':', xPos + 3, yPos);
+            
             doc.setFont(undefined, 'normal');
             doc.setTextColor(0, 0, 0);
-            doc.text(String(value || '-'), xPos + labelOffset, yPos);
+            
+            // Truncate long text to fit in box
+            let displayValue = String(value || '-');
+            const textWidth = doc.getTextWidth(displayValue);
+            if (textWidth > maxTextWidth) {
+                // Truncate and add ellipsis
+                while (doc.getTextWidth(displayValue + '...') > maxTextWidth && displayValue.length > 0) {
+                    displayValue = displayValue.slice(0, -1);
+                }
+                displayValue += '...';
+            }
+            doc.text(displayValue, xPos + labelOffset, yPos);
             return yPos + 6;
         };
 
