@@ -134,6 +134,58 @@ function hasRealSignature(id) {
     return (nonTransparentPixels / totalPixels) > 0.01;
 }
 
+// Reset Form Function
+function resetForm() {
+    const form = document.getElementById('selfEmployedForm');
+    
+    // Reset all text inputs
+    form.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(input => {
+        input.value = '';
+    });
+    
+    // Reset dates to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('form_date').value = today;
+    document.getElementById('sig_date').value = today;
+    
+    // Reset radio buttons to default
+    document.querySelector('input[name="has_deps"][value="No"]').checked = true;
+    document.querySelector('input[name="biz_in_house"][value="No"]').checked = true;
+    document.querySelector('input[name="public_assist"][value="No"]').checked = true;
+    
+    // Hide dependents section
+    document.getElementById('deps_section').classList.add('hidden');
+    document.getElementById('deps_container').innerHTML = '';
+    
+    // Show business external section, hide home section
+    document.getElementById('biz_external').classList.remove('hidden');
+    document.getElementById('biz_home').classList.add('hidden');
+    
+    // Reset use personal address checkbox
+    const usePersonalAddress = document.getElementById('use_personal_address');
+    if (usePersonalAddress) {
+        usePersonalAddress.checked = false;
+    }
+    document.getElementById('biz_address_fields').classList.remove('hidden');
+    
+    // Reset expenses
+    document.getElementById('has_expenses').checked = false;
+    document.getElementById('expense_amount_div').classList.add('hidden');
+    document.getElementById('expense_freq_div').classList.add('hidden');
+    document.getElementById('expense_proof_div').classList.add('hidden');
+    
+    // Reset multi-select dropdowns
+    document.querySelectorAll('select[multiple]').forEach(select => {
+        Array.from(select.options).forEach(option => option.selected = false);
+    });
+    
+    // Clear signature canvas
+    clearSig('sig_tp');
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 // Form Submit
 document.getElementById('selfEmployedForm').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -497,6 +549,9 @@ document.getElementById('selfEmployedForm').addEventListener('submit', async fun
         link.href = pdfBase64;
         link.download = `SelfEmployed_${formData.tp_name}_${formData.tp_lastname}_2026.pdf`;
         link.click();
+
+        // Reset form after successful submission
+        resetForm();
 
     } catch (error) {
         loader.classList.add('hidden');
